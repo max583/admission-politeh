@@ -17,13 +17,10 @@ class Abiturient:
     def passDirection(self, direction):
         self.passedDirection = direction
 
-    def removed(self,):
-        self.removed = True
-
 class Direction:
     def __init__(self, code, name):
         self.counter = 0
-        self.passEge = 300
+        self.passEge = 310
         self.students = []
         self.limit = 0
         self.code = code
@@ -109,7 +106,6 @@ for id, direction in directionList.items():
 print(f"Всего абитуриентов загружено: {len(abiturientList)}")
 
 print("Распределяем абитуриентов")
-allocatedAbiturientSnils = []
 
 for snils, abiturient in sorted(abiturientList.items(), key=lambda x: x[1].ege,reverse=True):
     for priority in sorted(abiturient.directions):
@@ -117,7 +113,6 @@ for snils, abiturient in sorted(abiturientList.items(), key=lambda x: x[1].ege,r
         if directionList[direction_id].isAvailable():
             directionList[direction_id].addAbiturient(abiturient.ege,abiturient.snils)
             abiturient.passedDirection = direction_id
-            allocatedAbiturientSnils.append(snils)
             break
 
 print("Проходные баллы по направлениям")
