@@ -28,6 +28,7 @@ class Direction:
         self.limit = 0
         self.code = code
         self.name = name
+        self.laststudent = ''
 
     def isAvailable(self):
         return self.limit > self.counter
@@ -36,6 +37,7 @@ class Direction:
         self.counter += 1
         self.passEge = ege
         self.students.append(snils)
+        self.laststudent = snils
 
 print("Загружаем направления.")
 page = 1
@@ -120,7 +122,7 @@ for snils, abiturient in sorted(abiturientList.items(), key=lambda x: x[1].ege,r
 
 print("Проходные баллы по направлениям")
 for _, direction in directionList.items():
-    print(f'{direction.name}, лимит: {direction.limit}, распределено: {direction.counter}, проходной балл {direction.passEge}')
+    print(f'{direction.name}, лимит: {direction.limit}, распределено: {direction.counter}, проходной балл {direction.passEge}, последний зачисленный {direction.laststudent}')
 
 print(f'\nАбитуриент {CHECK_ABITURIENT}, направления:')
 for pr in sorted(abiturientList[CHECK_ABITURIENT].directions):
