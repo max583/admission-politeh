@@ -128,3 +128,18 @@ if abiturientList[CHECK_ABITURIENT].passedDirection == 0:
     print('Баллы ЕГЭ', abiturientList[CHECK_ABITURIENT].ege, ', не проходит ни на какое направление.')
 else:
     print('Баллы ЕГЭ',abiturientList[CHECK_ABITURIENT].ege, ', проходит на направление:', directionList[abiturientList[CHECK_ABITURIENT].passedDirection].name)
+
+for priority in abiturientList[CHECK_ABITURIENT].directions:
+    id = abiturientList[CHECK_ABITURIENT].directions[priority]
+    print('\nАбитуриенты', directionList[id].name)
+    i = 1
+    for snils in sorted(directionList[id].students, key=lambda x: abiturientList[x].ege, reverse=True):
+        print(i, ':', snils, '|' ,abiturientList[snils].ege)
+        i += 1
+    print('Ближайшие конкуренты')
+    limit = 10
+    i = 0
+    for snils, abiturient in sorted(abiturientList.items(), key=lambda x: x[1].ege, reverse=True):
+        if abiturient.passedDirection == 0 and id in abiturient.directions.values() and i < limit:
+            i += 1
+            print(i, ':', snils, '|' ,abiturient.ege)
