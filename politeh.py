@@ -97,6 +97,9 @@ for id, direction in directionList.items():
         if not snils in abiturientList:
             abiturientList[snils] = Abiturient(snils, ege)
 
+        if ege > abiturientList[snils].ege:
+            abiturientList[snils].ege = ege
+
         abiturientList[snils].addDirection(id, int(abiturient['priority']))
         abiturientSum += 1
 
