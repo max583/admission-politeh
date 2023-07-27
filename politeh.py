@@ -1,15 +1,20 @@
 import requests
 import json
 import time
+import random
 
-CHECK_ABITURIENT = '170-307-112 17'
+CHECK_ABITURIENT = '170-307-112 17'     # Проверяемый абитуриент
+CONSIDER_DOCS = False                   # True - Распределяем только тех, кто принес оригинал (согласие), False - распределяем всех
+ELIMINATE_PERS = 20                     # Процент случайного отсева (0 - никого не отсеиваем, 100 - отсеиваем 100% абитуриентов)
 
 class Abiturient:
-    def __init__(self, snils, ege):
+    def __init__(self, snils, ege, has_docs):
         self.directions = {}
         self.passedDirection = 0
         self.ege = ege
         self.snils = snils
+        self.has_docs = has_docs
+        self.eliminated = False
 
     def addDirection(self, direction, priority):
         self.directions[priority] = direction
@@ -94,8 +99,13 @@ for id, direction in directionList.items():
 
         snils = abiturient['userSnils']
 
+        has_docs = abiturient['hasOriginalDocuments']
+
         if not snils in abiturientList:
-            abiturientList[snils] = Abiturient(snils, ege)
+            abiturientList[snils] = Abiturient(snils, ege, has_docs)
+
+        if ege > abiturientList[snils].ege:
+            abiturientList[snils].ege = ege
 
         if ege > abiturientList[snils].ege:
             abiturientList[snils].ege = ege
@@ -108,15 +118,22 @@ for id, direction in directionList.items():
 
 print(f"Всего абитуриентов загружено: {len(abiturientList)}")
 
+print('Отсеиваем случайных')
+if ELIMINATE_PERS > 0:
+    for _, abiturient in abiturientList.items():
+        if random.randint(0, 1000) <= ELIMINATE_PERS*10:
+            abiturient.eliminated = True
+
 print("Распределяем абитуриентов")
 
 for snils, abiturient in sorted(abiturientList.items(), key=lambda x: x[1].ege,reverse=True):
-    for priority in sorted(abiturient.directions):
-        direction_id = abiturient.directions[priority]
-        if directionList[direction_id].isAvailable():
-            directionList[direction_id].addAbiturient(abiturient.ege,abiturient.snils)
-            abiturient.passedDirection = direction_id
-            break
+    if ((CONSIDER_DOCS and abiturient.has_docs) or not CONSIDER_DOCS) and not abiturient.eliminated:
+        for priority in sorted(abiturient.directions):
+            direction_id = abiturient.directions[priority]
+            if directionList[direction_id].isAvailable():
+                directionList[direction_id].addAbiturient(abiturient.ege,abiturient.snils)
+                abiturient.passedDirection = direction_id
+                break
 
 print("Проходные баллы по направлениям")
 for _, direction in directionList.items():
@@ -137,12 +154,13 @@ for priority in abiturientList[CHECK_ABITURIENT].directions:
     print('\nАбитуриенты', directionList[id].name)
     i = 1
     for snils in sorted(directionList[id].students, key=lambda x: abiturientList[x].ege, reverse=True):
-        print(i, ':', snils, '|' ,abiturientList[snils].ege)
+        print(i, ':', snils, '|' ,abiturientList[snils].ege, abiturientList[snils].has_docs)
         i += 1
     print('Ближайшие конкуренты')
     limit = 10
     i = 0
     for snils, abiturient in sorted(abiturientList.items(), key=lambda x: x[1].ege, reverse=True):
-        if abiturient.passedDirection == 0 and id in abiturient.directions.values() and i < limit:
-            i += 1
-            print(i, ':', snils, '|' ,abiturient.ege)
+        if ((CONSIDER_DOCS and abiturient.has_docs) or not CONSIDER_DOCS) and not abiturient.eliminated:
+            if abiturient.passedDirection == 0 and id in abiturient.directions.values() and i < limit:
+                i += 1
+                print(i, ':', snils, '|' ,abiturient.ege, abiturient.has_docs)
